@@ -3,19 +3,18 @@
   "version": "1.0.0",
   "description": "Like connect-redis, but smarter.",
   "main": "index.js",
-  "dependencies": {
-    "connect": "^3.3.5",
-    "debug": "^2.1.3",
-    "redis-fantastico": "^0.0.1"
-  },
   "devDependencies": {
     "chai": "^2.1.2",
+    "debug": "^2.1.3",
     "jshint": "^2.6.3",
     "mocha": "^2.2.1",
+    "redis": "^0.12.1",
     "sinon": "^1.14.1"
   },
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha tests/unit --recursive && node node_modules/jshint/bin/jshint lib"
+    "test": "node node_modules/mocha/bin/mocha test/unit --recursive && node node_modules/jshint/bin/jshint lib",
+    "integration": "node node_modules/mocha/bin/mocha test/integration --recursive",
+    "cover": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -34,5 +33,8 @@
   "bugs": {
     "url": "https://github.com/MCProHosting/connect-smart-redis/issues"
   },
-  "homepage": "https://github.com/MCProHosting/connect-smart-redis"
+  "homepage": "https://github.com/MCProHosting/connect-smart-redis",
+  "dependencies": {
+    "fast-json-patch": "^0.5.1"
+  }
 }
