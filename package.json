@@ -14,7 +14,8 @@
   "scripts": {
     "test": "node node_modules/mocha/bin/mocha test/unit --recursive && node node_modules/jshint/bin/jshint lib",
     "integration": "node node_modules/mocha/bin/mocha test/integration --recursive",
-    "cover": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- test/unit --recursive"
+    "cover": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- test/unit --recursive",
+    "travis": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha --report lcovonly -- test/unit --recursive"
   },
   "repository": {
     "type": "git",
