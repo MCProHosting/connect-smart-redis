@@ -7,7 +7,7 @@ before(function (done) {
 });
 
 beforeEach(function (done) {
-    this.redis.DEL(['foo', 'bar'], done);
+    this.redis.DEL(['session:foo', 'session:bar', 'session:foo:lock', 'session:bar:lock'], done);
     this.store = new Store({ client: this.redis, ttl: 1 });
 });
 

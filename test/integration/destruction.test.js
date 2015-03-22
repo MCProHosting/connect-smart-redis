@@ -1,30 +1,25 @@
 var expect = require('chai').expect;
 
 describe('destruction', function () {
-    var foo, bar;
+    var foo1, foo2;
 
     beforeEach(function (done) {
         var self = this;
-        this.redis.MSET(['session:foo', '{"a":1}', 'session:bar', '{"b":2}'], function () {
+        this.redis.SET(['session:foo', '{"a":1}'], function () {
             self.store.get('foo', function (err, f) {
-                foo = f;
-                self.store.get('bar', function (err, b) {
-                    bar = b;
+                foo1 = f;
+                self.store.get('foo', function (err, f) {
+                    foo2 = f;
                     done();
                 });
             });
         });
     });
 
-    it('actually gets them correctly', function () {
-        expect(foo.a).to.equal(1);
-        expect(bar.b).to.equal(2);
-    });
-
     it('gets and destroys a single session', function (done) {
         var self = this;
-        foo.destroy();
-        this.store.set('foo', foo, function () {
+        foo1.destroy();
+        this.store.set('foo', foo1, function () {
             self.redis.GET('session:foo', function (err, result) {
                 expect(result).to.equal('DESTROYED');
                 done();
@@ -36,10 +31,10 @@ describe('destruction', function () {
         var self = this;
 
         self.store.get('foo', function (err, foo2) {
-            foo.destroy();
+            foo1.destroy();
             foo2.a = 3;
 
-            self.store.set('foo', foo, function () {
+            self.store.set('foo', foo1, function () {
                 self.store.set('foo', foo2, function () {
                     self.redis.GET('session:foo', function (err, result) {
                         expect(result).to.equal('DESTROYED');
@@ -53,8 +48,8 @@ describe('destruction', function () {
     it('saves new over destruction', function (done) {
         var self = this;
 
-        foo.destroy();
-        self.store.set('foo', foo, function () {
+        foo1.destroy();
+        self.store.set('foo', foo1, function () {
             self.store.get('foo', function (err, foo2) {
                 foo2.a = 3;
                 self.store.set('foo', foo2, function () {
@@ -62,6 +57,42 @@ describe('destruction', function () {
                         expect(result).to.equal('{"a":3}');
                         done();
                     });
+                });
+            });
+        });
+    });
+
+    it('aborts when saving over locked destruction', function (done) {
+        var self = this;
+
+        foo1.destroy();
+        foo2.a = 3;
+
+        self.store.set('foo', foo1, function () {});
+
+        setImmediate(function () {
+            self.store.set('foo', foo2, function () {
+                self.redis.GET('session:foo', function (err, result) {
+                    expect(result).to.equal('DESTROYED');
+                    done();
+                });
+            });
+        });
+    });
+
+    it('locks destruction to prevent races', function (done) {
+        var self = this;
+
+        foo1.destroy();
+        foo2.a = 3;
+
+        self.store.set('foo', foo2, function () {});
+
+        setImmediate(function () {
+            self.store.set('foo', foo1, function () {
+                self.redis.GET('session:foo', function (err, result) {
+                    expect(result).to.equal('DESTROYED');
+                    done();
                 });
             });
         });

@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
 
-describe('destruction', function () {
+describe('patching', function () {
     var foo1, foo2;
 
     beforeEach(function (done) {

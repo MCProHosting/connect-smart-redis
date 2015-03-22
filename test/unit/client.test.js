@@ -21,10 +21,21 @@ describe('client', function () {
         expect(store.getLockKey('foo')).to.equal('session:foo:lock');
     });
 
-    it('destroys the session', function () {
+    it('destroys the session', function (done) {
+        var end = sinon.spy();
         client.SETEX = sinon.spy();
-        store.destroy('foo');
+        sinon.stub(store, 'lock');
+
+        store.destroy('foo', function () {
+            expect(end.called).to.be.true;
+            done();
+        });
+
+        expect(store.lock.calledWith('foo')).to.be.true;
+        store.lock.yieldOn(store, null, end);
+
         expect(client.SETEX.calledWith(['session:foo', 5000, 'DESTROYED'])).to.be.true;
+        client.SETEX.yield();
     });
 
     describe('session get', function () {
@@ -99,14 +110,11 @@ describe('client', function () {
         });
 
         it('works on first try', function (done) {
-            var lock;
             store.lock('foo', function (err, str) {
-                expect(str).to.equal(lock);
                 done();
             });
 
             expect(client.SET.called).to.be.true;
-            lock = client.SET.args[0][0][1];
             client.SET.yield(undefined, 'OK');
         });
 
@@ -209,6 +217,15 @@ describe('client', function () {
                 done();
             });
         });
+        it('does not update when forgotten', function (done) {
+            session.a = 'b';
+            session.forget();
+
+            store.set('foo', session, function () {
+                expect(store.lock.called).to.be.false;
+                done();
+            });
+        });
 
         it('calls destroy when destroyed', function (done) {
             session.destroy();
@@ -222,27 +239,31 @@ describe('client', function () {
         });
 
         it('updates when changed', function (done) {
+            var end = sinon.spy();
+
             session.foo = 1;
             store.set('foo', session, function (err) {
                 expect(err).to.be.undefined;
-                expect(store.unlock.calledWith('foo', 'a')).to.be.true;
+                expect(end.called).to.be.true;
                 done();
             });
             expect(store.lock.calledWith('foo')).to.be.true;
-            store.lock.yield(null, 'a');
+            store.lock.yieldOn(store, null, end);
             expect(store.saveUpdates.called).to.be.true;
             store.saveUpdates.yield();
         });
 
         it('unlocks even when there is an error in saving updates', function (done) {
+            var end = sinon.spy();
+
             session.foo = 1;
             store.set('foo', session, function (err) {
                 expect(err).to.be.defined;
-                expect(store.unlock.calledWith('foo', 'a')).to.be.true;
+                expect(end.called).to.be.true;
                 done();
             });
             expect(store.lock.calledWith('foo')).to.be.true;
-            store.lock.yield(null, 'a');
+            store.lock.yieldOn(store, null, end);
             expect(store.saveUpdates.called).to.be.true;
             store.saveUpdates.yield('err!');
         });
