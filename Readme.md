@@ -26,7 +26,7 @@ Use this just like any other session middleware. It takes the following options:
 
 ## Performance
 
-Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 2610 nanoseconds (0.03 ms) per transaction. Comparatively, connect-redis ran an overhead of 3090 nanoseconds (0.03 ms) per transaction.
+Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 3090 nanoseconds (0.03 ms) per transaction. Comparatively, connect-redis ran an overhead of 2610 nanoseconds (0.03 ms) per transaction.
 
 ```
 $ node bench\head-to-head.js
