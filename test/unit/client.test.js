@@ -238,6 +238,20 @@ describe('client', function () {
             store.destroy.yield();
         });
 
+        it('updates when new', function (done) {
+            var end = sinon.spy();
+
+            store.set('foo', { foo: 'bar' }, function (err) {
+                expect(err).to.be.undefined;
+                expect(end.called).to.be.true;
+                done();
+            });
+            expect(store.lock.calledWith('foo')).to.be.true;
+            store.lock.yieldOn(store, null, end);
+            expect(store.saveUpdates.called).to.be.true;
+            store.saveUpdates.yield();
+        });
+
         it('updates when changed', function (done) {
             var end = sinon.spy();
 
