@@ -22,11 +22,11 @@ Use this just like any other session middleware. It takes the following options:
  * `prefix=session:` The prefix for redis sessions
  * `lockExpiry=5000` Time in milliseconds session locks should last for.
  * `retryTime=100` Time we should wait if we did no acquire a session lock.
- * `deleteExpiry=50001 The length of a DESTROYED session record should last. This should be at least as long as your longest API request (but does not need to be longer).
+ * `deleteExpiry=5000` - The length of a DESTROYED session record should last. This should be at least as long as your longest API request (but does not need to be longer).
 
 # Performance
 
-Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 0.07 millseconds per transaction. Comparatively, connect-redis ran an overhead os 0.02 milliseconds per transaction.
+Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 0.07 millseconds per transaction. Comparatively, connect-redis ran an overhead of 0.03 milliseconds per transaction.
 
 ```
 $ node bench\head-to-head.js
@@ -40,7 +40,7 @@ All in all, smart-redis has about twice the overhead of its predecessor. However
 
 There is a race condition if two requests simultaneously edit the same attribute of the session. In this event, the request which acquires the lock last will take precedence. There is no way to effectively mitigate this; this is a situation you should bear in mind when building your application.
 
-Additionally, due to the locking, it's possible that if you get very many requests which all edit the session during the same time interval, requests may take an unusually long time.
+Additionally, due to the locking, it's possible that if you get very many requests which all edit the session during the same time interval, requests for the particular user may take an unusually long time.
 
 # License
 
