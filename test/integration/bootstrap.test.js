@@ -1,5 +1,5 @@
 var redis = require('redis');
-var Store = require('../../')({ session: { Store: function () {} }});
+var Store = require('../../')({ Store: function () {} });
 
 before(function (done) {
     this.redis = redis.createClient();

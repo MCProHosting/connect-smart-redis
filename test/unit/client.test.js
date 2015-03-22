@@ -4,7 +4,7 @@ var sinon = require('sinon');
 
 describe('client', function () {
     var Session = require('../../lib/session');
-    var connect = { session: { Store: function () {} }};
+    var connect = { Store: function () {} };
     var Store = require('../../lib/index')(connect);
     var store, client;
 

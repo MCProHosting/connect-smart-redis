@@ -24,24 +24,26 @@ Use this just like any other session middleware. It takes the following options:
  * `retryTime=100` Time we should wait if we did no acquire a session lock.
  * `deleteExpiry=5000` - The length of a DESTROYED session record should last. This should be at least as long as your longest API request (but does not need to be longer).
 
-# Performance
+## Performance
 
-Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 0.07 millseconds per transaction. Comparatively, connect-redis ran an overhead of 0.03 milliseconds per transaction.
+Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 2610 nanoseconds (0.03 ms) per transaction. Comparatively, connect-redis ran an overhead of 3090 nanoseconds (0.03 ms) per transaction.
 
 ```
 $ node bench\head-to-head.js
-connect-redis x 385,026 ops/sec ±0.25% (100 runs sampled)
-connect-smart-redis x 146,042 ops/sec ±0.23% (98 runs sampled)
+connect-redis x 382,937 ops/sec ±0.21% (97 runs sampled)
+connect-smart-redis x 323,181 ops/sec ±0.22% (100 runs sampled)
 ```
 
-All in all, smart-redis has about twice the overhead of its predecessor. However, if the you aren't updating client sessions in every request, the saved Redis queries will far eclipse the hundredths of a millisecond difference. And if you are, it may be a good idea to use smart-redis anyway due to its mitigation of race conditions!
+The overhead is pretty minimal on an application level.
 
-# Caveats
+But, the locking and updating process does involve four addition Redis queries. If you update the client session in more than 20% of your requests, performance will be degregated using this system. However, you are, it may be a good idea to use smart-redis due to its mitigation of race conditions; it's always a trade off. If you are changing the session in less than 20% of your total requests, you'll see substantially better performance using smart-redis due to the saved request.
+
+## Caveats
 
 There is a race condition if two requests simultaneously edit the same attribute of the session. In this event, the request which acquires the lock last will take precedence. There is no way to effectively mitigate this; this is a situation you should bear in mind when building your application.
 
 Additionally, due to the locking, it's possible that if you get very many requests which all edit the session during the same time interval, requests for the particular user may take an unusually long time.
 
-# License
+## License
 
 This software is MIT licensed, copyright 2015 by Beam LLC.

@@ -9,7 +9,7 @@ var client = {
     on: function () {}
 };
 
-var SmartStore = require('../')({ session: { Store: function () {} }});
+var SmartStore = require('../')({ Store: function () {} });
 var CRStore = require('connect-redis')({ Store: function () {} });
 var crstore = new CRStore({ client: client, ttl: 60 });
 var smartstore = new SmartStore({ client: client, ttl: 60 });
