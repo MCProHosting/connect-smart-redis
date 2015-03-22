@@ -24,6 +24,10 @@ Use this just like any other session middleware. It takes the following options:
  * `retryTime=100` Time we should wait if we did no acquire a session lock.
  * `deleteExpiry=50001 The length of a DESTROYED session record should last. This should be at least as long as your longest API request (but does not need to be longer).
 
+# Performance
+
+Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 0.07 millseconds per transaction. Comparatively, connect-redis ran an overhead os 0.02 milliseconds per transaction.
+
 # License
 
 This software is MIT licensed, copyright 2015 by Beam LLC.
