@@ -28,6 +28,20 @@ Use this just like any other session middleware. It takes the following options:
 
 Non-trival parts of the code have been optimized for performance, and of course the middleware itself is built to be a "lazy" as possible. Based on data from our benchmark (using a fake Redis client) the middleware has an overhead of about 0.07 millseconds per transaction. Comparatively, connect-redis ran an overhead os 0.02 milliseconds per transaction.
 
+```
+$ node bench\head-to-head.js
+connect-redis x 385,026 ops/sec ±0.25% (100 runs sampled)
+connect-smart-redis x 146,042 ops/sec ±0.23% (98 runs sampled)
+```
+
+All in all, smart-redis has about twice the overhead of its predecessor. However, if the you aren't updating client sessions in every request, the saved Redis queries will far eclipse the hundredths of a millisecond difference. And if you are, it may be a good idea to use smart-redis anyway due to its mitigation of race conditions!
+
+# Caveats
+
+There is a race condition if two requests simultaneously edit the same attribute of the session. In this event, the request which acquires the lock last will take precedence. There is no way to effectively mitigate this; this is a situation you should bear in mind when building your application.
+
+Additionally, due to the locking, it's possible that if you get very many requests which all edit the session during the same time interval, requests may take an unusually long time.
+
 # License
 
 This software is MIT licensed, copyright 2015 by Beam LLC.
