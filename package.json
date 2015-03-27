@@ -1,6 +1,6 @@
 {
   "name": "connect-smart-redis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Like connect-redis, but smarter.",
   "main": "index.js",
   "devDependencies": {
