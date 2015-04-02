@@ -4,6 +4,44 @@
 
 connect-smart-redis is inspired by [connect-redis](http://github.com/tj/connect-redis). It's fast, light, and (you guessed it) smart!
 
+## Usage
+
+Install with:
+
+```
+npm install --save connect-smart-redis
+```
+
+Example:
+
+```js
+// Import Express, make the app and the redis client
+var express = require('express');
+var client = require('redis').createClient();
+var app = express();
+
+// Express session finagling
+var session = require('express-session');
+var SmartRedis = require('connect-smart-redis')(session);
+
+// Actually use the session middleware
+var thirtyDays = 30 * 24 * 60 * 60;
+app.use(session({
+    store: new SmartRedis({ client: client, ttl: thirtyDays }),
+    secret: 'hello world!',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Voila!
+app.get('/', function (req, res) {
+    req.session.visits = (req.session.visits || 0) + 1;
+    res.send('You visited this site ' + req.session.visits + ' times!');
+});
+
+app.listen(3000);
+```
+
 ## Why?
 
 Connect-redis is great, but it was missing several features necessary for some production environments (like ours!). Several improvements were necessary, including:
@@ -13,9 +51,9 @@ Connect-redis is great, but it was missing several features necessary for some p
  * **Smart Updates.** Only changed properties are updated. This goes well with locking -- there's less a chance of one request stepping on another's feet.
  * **Smart Deletions.** As a result of the race conditions, we were having difficulty destroying sessions because it would get re-set right over again! Using locking we delete things as expected.
 
-## Options/Usage
+## Options
 
-Use this just like any other session middleware. It takes the following options:
+The following options can be passed in its constructor:
 
  * `ttl` Time in seconds sessions should last for
  * `client` a node-redis (or compatible) client
