@@ -14,20 +14,20 @@ var CRStore = require('connect-redis')({ Store: function () {} });
 var crstore = new CRStore({ client: client, ttl: 60 });
 var smartstore = new SmartStore({ client: client, ttl: 60 });
 
-var session = new (require('../lib/session'))({ a: 1, b: 3,c: [1,2,3] });
+var session = require('../lib/session').attach({ a: 1, b: 3,c: [1,2,3] });
 
 function noop () {}
         crstore.get('foo', noop);
         crstore.set('foo', { cookie: {}, a: 1, b: 3,c: [1,2,3] }, noop);
 
 new Benchmark.Suite()
-    .add('connect-redis', function () {
-        crstore.get('foo', noop);
-        crstore.set('foo', { cookie: {}, a: 1, b: 3,c: [1,2,3] }, noop);
-    })
     .add('connect-smart-redis', function () {
         smartstore.get('foo', noop);
         smartstore.set('foo', session, noop);
+    })
+    .add('connect-redis', function () {
+        crstore.get('foo', noop);
+        crstore.set('foo', { cookie: {}, a: 1, b: 3,c: [1,2,3] }, noop);
     })
     .on('cycle', function(event) {
       console.log(String(event.target));

@@ -48,8 +48,8 @@ describe('client', function () {
         it('pulls existing data from redis', function (done) {
             store.get('foo', function (err, session) {
                 expect(err).not.to.be.defined;
-                expect(session.toObject()).to.deep.equal({ foo: 'bar' });
-                expect(session.isFromDestroyed()).to.be.false;
+                expect(session._.trim(session)).to.deep.equal({ foo: 'bar' });
+                expect(session._.isFromDestroyed()).to.be.false;
                 done();
             });
 
@@ -60,8 +60,8 @@ describe('client', function () {
         it('works even without data', function (done) {
             store.get('foo', function (err, session) {
                 expect(err).not.to.be.defined;
-                expect(session.toObject()).to.deep.equal({});
-                expect(session.isFromDestroyed()).to.be.false;
+                expect(session._.trim(session)).to.deep.equal({});
+                expect(session._.isFromDestroyed()).to.be.false;
                 done();
             });
 
@@ -71,8 +71,8 @@ describe('client', function () {
         it('should respect destroyed sessions', function (done) {
             store.get('foo', function (err, session) {
                 expect(err).not.to.be.defined;
-                expect(session.toObject()).to.deep.equal({});
-                expect(session.isFromDestroyed()).to.be.true;
+                expect(session._.trim(session)).to.deep.equal({});
+                expect(session._.isFromDestroyed()).to.be.true;
                 done();
             });
 
@@ -82,8 +82,8 @@ describe('client', function () {
         it('should not fail if we have random data', function (done) {
             store.get('foo', function (err, session) {
                 expect(err).not.to.be.defined;
-                expect(session.toObject()).to.deep.equal({});
-                expect(session.isFromDestroyed()).to.be.false;
+                expect(session._.trim(session)).to.deep.equal({});
+                expect(session._.isFromDestroyed()).to.be.false;
                 done();
             });
 
@@ -157,10 +157,11 @@ describe('client', function () {
         });
 
         it('does not save when session has been destroyed', function (done) {
-            var a = new Session({}, false);
-            var b = new Session({}, true);
+            var a = Session.attach({}, false);
+            var b = Session.attach({}, true);
 
-            store.saveUpdates('foo', a, function (err) {
+            a._.setAgainst(a);
+            store.saveUpdates('foo', a._, function (err) {
                 expect(err).not.to.be.defined;
                 expect(client.SETEX.called).to.be.false;
                 done();
@@ -170,10 +171,11 @@ describe('client', function () {
         });
 
         it('does when both destroyed', function (done) {
-            var a = new Session({}, true);
-            var b = new Session({}, true);
+            var a = Session.attach({}, true);
+            var b = Session.attach({}, true);
 
-            store.saveUpdates('foo', a, function (err) {
+            a._.setAgainst(a);
+            store.saveUpdates('foo', a._, function (err) {
                 expect(err).not.to.be.defined;
                 expect(client.SETEX.calledWith([ 'session:foo', 42, '{}'])).to.be.true;
                 done();
@@ -184,12 +186,13 @@ describe('client', function () {
         });
 
         it('does on new, applies changes', function (done) {
-            var a = new Session({ foo: 1, bar: 2 }, false);
-            var b = new Session({ foo: 1, bar: 2 }, false);
+            var a = Session.attach({ foo: 1, bar: 2 }, false);
+            var b = Session.attach({ foo: 1, bar: 2 }, false);
+            b._.original.foo = 2;
             a.bar = 4;
-            b.foo = 2;
 
-            store.saveUpdates('foo', a, function (err) {
+            a._.setAgainst(a);
+            store.saveUpdates('foo', a._, function (err) {
                 expect(err).not.to.be.defined;
                 expect(client.SETEX.calledWith([ 'session:foo', 42, '{"foo":2,"bar":4}'])).to.be.true;
                 done();
@@ -208,7 +211,7 @@ describe('client', function () {
             sinon.stub(store, 'saveUpdates');
             sinon.stub(store, 'unlock');
             sinon.stub(store, 'destroy');
-            session = new Session({ foo: 'bar' });
+            session = Session.attach({ foo: 'bar' });
         });
 
         it('does not update when unchanged', function (done) {
@@ -239,17 +242,15 @@ describe('client', function () {
         });
 
         it('updates when new', function (done) {
-            var end = sinon.spy();
+            client.SETEX = sinon.stub();
 
             store.set('foo', { foo: 'bar' }, function (err) {
                 expect(err).to.be.undefined;
-                expect(end.called).to.be.true;
+                expect(client.SETEX.called).to.be.true;
                 done();
             });
-            expect(store.lock.calledWith('foo')).to.be.true;
-            store.lock.yieldOn(store, null, end);
-            expect(store.saveUpdates.called).to.be.true;
-            store.saveUpdates.yield();
+
+            client.SETEX.yield();
         });
 
         it('updates when changed', function (done) {
