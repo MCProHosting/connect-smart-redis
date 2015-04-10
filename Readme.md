@@ -4,7 +4,7 @@
 
 Connect-smart-redis is inspired by [connect-redis](http://github.com/tj/connect-redis), and is designed for distributed environments. It's fast, light, and (you guessed it) smart! It requires Redis version 2.6.12 or newer.
 
-> **Status**: this is currently used in production in distributed environment and non-distributed environments. There are no known issues with it at this time.
+> **Status**: this is currently used in production in distributed and non-distributed environments. There are no known issues with it at this time.
 
 ## Usage
 
