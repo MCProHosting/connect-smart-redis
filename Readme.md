@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/MCProHosting/connect-smart-redis.svg)](https://travis-ci.org/MCProHosting/connect-smart-redis) [![Coverage Status](https://coveralls.io/repos/MCProHosting/connect-smart-redis/badge.svg)](https://coveralls.io/r/MCProHosting/connect-smart-redis)
 
-connect-smart-redis is inspired by [connect-redis](http://github.com/tj/connect-redis). It's fast, light, and (you guessed it) smart! It requires Redis version 2.6.12 or newer.
+Connect-smart-redis is inspired by [connect-redis](http://github.com/tj/connect-redis), and is designed for distributed environments. It's fast, light, and (you guessed it) smart! It requires Redis version 2.6.12 or newer.
+
+> **Status**: this is currently used in production in distributed environment and non-distributed environments. There are no known issues with it at this time.
 
 ## Usage
 
